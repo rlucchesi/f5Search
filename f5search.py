@@ -69,10 +69,10 @@ ui_outputPathStr = str()
 # List holding objects to be outputed
 scriptOutputObjList = [ ]
 
+
 #####################
 ### Script Functions
 #####################
-
 def localDateTime(isDirPar = 0):
 	"""
 	Produces a string with the current date and time
@@ -941,6 +941,10 @@ class F5gtm (object):
 		print("\n ** wideipPool ")
 		printListDict(self.__wideipPool)
 
+
+#####################
+### Script Body
+#####################
 if readInput():
 	# if inputNodeList is empty, load it with the contents of the user input csv
 	if len(inputNodeList) == 0:
