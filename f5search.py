@@ -31,6 +31,8 @@ from random import randint
 from datetime import datetime
 # now = datetime.now()
 # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+import socket
+# socket.gethostbyaddr("IP") => (hostname, alias-list, IP)
 import sys
 import pandas as pd
 
@@ -49,6 +51,7 @@ helpStrList = [ "", "Search F5 database based on IP addresses.",
    "	-s		source file location (bigip_gtm.conf / bigip.conf)", "	-i		single target ip address",
     "	-f		csv file name/location (1 IPv4 per line, starting at A2)",
      "	-g		generates a template csv file to be used as input file (./myBook.csv)",
+      "	-d		disable DNS lookup on each input ip_address", 
       "	-o		output directory location (ip_address.txt output file per node)", "	-h		show help", ""]
 
 # List of nodes to be searched
@@ -69,6 +72,8 @@ ui_outputPathStr = str()
 # List holding objects to be outputed
 scriptOutputObjList = [ ]
 
+# Bool to flag if DNS resolution is desired
+ui_dnsResolution = 1
 
 #####################
 ### Script Functions
@@ -88,6 +93,19 @@ def localDateTime(isDirPar = 0):
 def printHelp():
 	for i in helpStrList:
 		print(i)
+
+def getNameResolution(inputIpStrPar):
+	"""
+	Returns a tuple containing the DNS resolution of an input IP address, a list of its aliases, and the IP itself.
+	input:	inputIpStrPar, an input IP address to be queried
+	output:	tuple contaning DNS resolution, list of alias, IP queried
+	"""
+	try:
+		return socket.gethostbyaddr(inputIpStrPar)
+	except socket.herror:
+		return ("Ip address not found", [ ], inputIpStrPar)
+	except:
+		return ("invalid Ip address", [ ], inputIpStrPar)
 
 def trimString(inputStrPar, delimiterPar, wantedPortionPar):
 	"""
@@ -130,6 +148,7 @@ def readInput():
 	global ui_f5SourceLocationStr
 	global ui_CsvStr
 	global ui_outputPathStr
+	global ui_dnsResolution
 	isIp = 0
 	isFile = 0
 	isOutput = 0
@@ -151,6 +170,8 @@ def readInput():
 					isOutput += 1
 				elif input[1] == "s":
 					isSource += 1
+				elif input[1] == "d":
+					ui_dnsResolution = 0
 				else:
 					raise
 			elif isIp == 1 and isFile == 0 and input[0].isnumeric():
@@ -811,6 +832,7 @@ class F5gtm (object):
 		"""
 		## Variables
 		myOutputList = [ ]
+		tmp_dnsResolution = ( )
 		tmp_serverNameStr = str()
 		vsList = [ ]
 		memberList = [ ]
@@ -820,6 +842,11 @@ class F5gtm (object):
 		for addr in inputNodesListArg:
 			# add IP to the output
 			myOutputList.append("======== " + addr + " ========")
+
+			# if user desires, add DNS resolution
+			if ui_dnsResolution:
+				tmp_dnsResolution = getNameResolution(addr)
+				myOutputList.append("\nDNS resolution: " + tmp_dnsResolution[0])
 
 			## for each IP address
 			# if the ip address is in use by some server
