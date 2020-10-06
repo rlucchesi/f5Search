@@ -305,6 +305,8 @@ def getOutput(scriptOutputObjListPar, ui_outputPathStrPar):
 	outputPath = str()
 	fileAbsPathStr = str()
 	singleItemList = [ ]
+	index = -1
+	isException = 1
 
 	# if single IP input, print output to the screen
 	if len(inputNodeList) < 2:
@@ -315,34 +317,46 @@ def getOutput(scriptOutputObjListPar, ui_outputPathStrPar):
 	if len(ui_outputPathStrPar) > 0 or len(inputNodeList) > 1:
 		# build outputPath directory
 		outputPath = genOutputPath(ui_outputPathStrPar)
-		try:
-			# create dir
-			os.mkdir(outputPath, mode=0o777, dir_fd=None)
-			# write to output file
-			## append instead of write?!
-			for item in scriptOutputObjListPar:
-				if type(item) == type(str()):
-					lineList = item.split(" ")
-					# if new IP address, create new file
-					if lineList[0] == '========' and lineList[2] == '========':
-						fileAbsPathStr = outputPath + lineList[1] + '.txt'
-						# write to a new filehandle
-						with open(fileAbsPathStr, 'w') as filehandle:
-							filehandle.write('%s\n' % item)
-					# else append to current filehandle
-					else:
-						with open(fileAbsPathStr, 'a') as filehandle:
-							filehandle.write('%s\n' % item)
+		
+		# keep looping if exceptions are found
+		while isException:
+			try:
+				# create dir
+				os.mkdir(outputPath, mode=0o777, dir_fd=None)
+			except FileExistsError:
+				# index to define unique folder name
+				index += 1
+				if index == 0:
+					outputPath = outputPath[:-1:] + '_' + str(index) + '\\'
 				else:
-					# pdb.set_trace()
-					singleItemList.append(str(item))
-					for line in singleItemList:
-						# append to current filehandle
-						with open(fileAbsPathStr, 'a') as filehandle:
-							filehandle.write('%s\n' % line)
-					singleItemList.clear()
-		except FileExistsError:
-			outputPath += outputPath + str(randint(0,9))
+					outputPath = outputPath[:-3:] + '_' + str(index) + '\\'
+			else:
+				# no exception: write to output file
+				for item in scriptOutputObjListPar:
+					# is string
+					if type(item) == type(str()):
+						lineList = item.split(" ")
+						# if new IP address, create new file
+						if lineList[0] == '========' and lineList[2] == '========':
+							fileAbsPathStr = outputPath + lineList[1] + '.txt'
+							# write to a new filehandle
+							with open(fileAbsPathStr, 'w') as filehandle:
+								filehandle.write('%s\n' % item)
+						# else append to current filehandle
+						else:
+							with open(fileAbsPathStr, 'a') as filehandle:
+								filehandle.write('%s\n' % item)
+					# is object
+					else:
+						# convert object to a string List
+						singleItemList.append(str(item))
+						for line in singleItemList:
+							# append each string to current filehandle
+							with open(fileAbsPathStr, 'a') as filehandle:
+								filehandle.write('%s\n' % line)
+						singleItemList.clear()
+				# get out of loop scenario
+				isException = 0
 	
 	# create summary file (only server/pool/wideip names)
 
