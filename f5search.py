@@ -311,8 +311,8 @@ def getOutput(scriptOutputObjListPar, ui_outputPathStrPar):
 		# produce stdout output
 	 	for line in scriptOutputObjListPar:
 	 		print(line)
-	# else create output subdir and txt files
-	else:
+	# if user entered an output Path or multiple IPs were searched, write output to files
+	if len(ui_outputPathStrPar) > 0 or len(inputNodeList) > 1:
 		# build outputPath directory
 		outputPath = genOutputPath(ui_outputPathStrPar)
 		try:
