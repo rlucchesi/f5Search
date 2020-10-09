@@ -1,24 +1,29 @@
+# f5Search
 # 
 # * Author:    Rafael Lucchesi
 # * Created:   2020/08/14
 #
-# Goal: query a GTM/LTM source file to output hostname, DNS resolution, virtual-servers, pools and wideIPs associated with an IP address.
+# Goal: query a DNS/LTM source file to output hostname, DNS resolution, virtual-servers, pools and wideIPs associated with an IP address.
 #
-# !Note: LTM portion under construction!
+# !Note: LTM portion under development!
 #
 # Script Input: -i IP address of the target backend server
 #		 		-f input .csv file
 #				-s bigip_gtm.conf/bigip.conf path
 #				-o output location path
+#				-d disable DNS resolution
 #
-# Output: 	If a single IP was provided (-i), output is displayed to the screen.
-#			If a .csv file was provided, output gets writen to a subfolder named "YYYYMMDD_HHMM_F5Search".
-#			If the output path was not defined, the subfolder will take the script's current directory as the reference.
+# Output: 	If a single IP is provided (-i), output is displayed to the screen only.
+#			If a single IP (-i) and output location (-o) were provided, output is displayed to the screen and an output text file is generated.
+#			If a .csv file is provided (-f) with a single IP (why?!), output is displayed to the screen only.
+#			If a .csv file is provided (-f) with multiple IPs, output gets writen to a subfolder named "YYYYMMDD_HHMM_F5Search" only.
+#				Note: If the output path was not defined, the subfolder will take the script's current directory as the reference.
 #
+#			Output information
 #			# IP DNS resolution
-#			# Hostname used in the F5 (and their Virtual-Servers)
-#			# List of Pools that list those Virtual-Servers
-#			# List of WideIPs that list those Pools
+#			# Hostname used in the F5 with their Virtual-Servers and properties
+#			# List of Pools that reference one of the Virtual-Servers associated with that IP
+#			# List of WideIPs that reference one of those Pools
 #
 ############################################################################################################################################
 
